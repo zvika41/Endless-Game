@@ -97,6 +97,11 @@ namespace Views
         {
             #if UNITY_EDITOR
             EditorApplication.ExitPlaymode();
+            
+            
+            #else
+            Application.Quit();
+
             #endif
         }
 
