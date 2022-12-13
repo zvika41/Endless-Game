@@ -33,28 +33,52 @@ namespace Views
             _currentPosition = Vector3.Lerp(_currentPosition, _newPosition, 10 * Time.deltaTime);
             _currentTransform.position = _currentPosition;
         }
-    
+
+        private void OnDestroy()
+        {
+            UnRegisterFromCallbacks();
+        }
+
         #endregion Mono Methods
-    
+
+
+        #region --- Private Methods ---
+
+        private void ResetView()
+        {
+            transform.position = new Vector3(0, 7.53f, -19f);
+            _target = null;
+            _offset.Set(0, 0, 0);
+        }
+
+        #endregion Private Methods
+        
     
         #region --- Event Handler ---
 
         private void RegisterToCallbacks()
         {
             Client.Instance.GameStarted += OnGameStarted;
+            Client.Instance.RestartGame += OnRestartGame;
         }
     
         private void OnGameStarted()
         {
-            UnRegisterFromCallbacks();
-            _isGameStarted = true;
             _target = Client.Instance.PlayerController.PlayerTransform;
             _offset = transform.position - _target.position;
+            
+            _isGameStarted = true;
+        }
+        
+        private void OnRestartGame()
+        {
+            ResetView();
         }
     
         private void UnRegisterFromCallbacks()
         {
             Client.Instance.GameStarted -= OnGameStarted;
+            Client.Instance.RestartGame -= OnRestartGame;
         }
 
         #endregion Event Handler

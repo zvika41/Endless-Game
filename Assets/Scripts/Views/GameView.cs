@@ -1,7 +1,6 @@
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace Views
@@ -36,6 +35,7 @@ namespace Views
 
         private void Start()
         {
+            gameOverPanel.SetActive(false);
             coinsAmountText.gameObject.SetActive(false);
             startGameText.SetActive(true);
             Time.timeScale = 1;
@@ -90,7 +90,8 @@ namespace Views
         public void ReplayGame()
         {
             UnRegisterFromCallbacks();
-            SceneManager.LoadScene("EndlessRunner");
+            Client.Instance.BroadcastRestartGameEvent();
+            Destroy(gameObject);
         }
    
         public void QuitGame()

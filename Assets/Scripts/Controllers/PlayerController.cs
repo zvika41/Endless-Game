@@ -58,7 +58,7 @@ namespace Controllers
             UnRegisterFromCallbacks();
             Client.Instance.DownloadAssetBundle(PREFAB_NAME);
         }
-    
+        
         private void UnRegisterFromCallbacks()
         {
             Client.Instance.GameStarted -= OnCompleteLoadGameView;

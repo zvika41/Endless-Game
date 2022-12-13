@@ -23,14 +23,19 @@ namespace Controllers
         #endregion Properties
         
         
-        #region --- Constructor ---
+        #region --- Constructor/Destructor ---
 
         public GameController()
         {
             RegisterToCallbacks();
         }
 
-        #endregion Constructor
+        ~GameController()
+        {
+            UnRegisterFromCallbacks();
+        }
+
+        #endregion Constructor/Destructor
     
 
         #region --- Event Handler ---
@@ -39,18 +44,29 @@ namespace Controllers
         {
             Client.Instance.StartLoadGameView += OnStartLoadGameView;
             Client.Instance.GameStarted += OnGameStarted;
+            Client.Instance.RestartGame += OnRestartGame;
         }
         
         private void OnStartLoadGameView()
         {
-            Client.Instance.StartLoadGameView -= OnStartLoadGameView;
             Client.Instance.DownloadAssetBundle(PREFAB_NAME);
         }
 
         private void OnGameStarted()
         {
-            Client.Instance.GameStarted -= OnGameStarted;
             _isGameStarted = true;
+        }
+        
+        private void OnRestartGame()
+        {
+            OnStartLoadGameView();
+        }
+        
+        private void UnRegisterFromCallbacks()
+        {
+            Client.Instance.StartLoadGameView -= OnStartLoadGameView;
+            Client.Instance.GameStarted -= OnGameStarted;
+            Client.Instance.RestartGame -= OnRestartGame;
         }
     
         #endregion Event Handler

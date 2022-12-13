@@ -29,6 +29,7 @@ public class Client : MonoBehaviour
     public event Action CompleteLoadGameView;
     public event Action GameStarted;
     public event Action GameEnded;
+    public event Action RestartGame;
 
     #endregion Events
     
@@ -115,6 +116,11 @@ public class Client : MonoBehaviour
     public void BroadcastGameEndedEvent()
     {
         GameEnded?.Invoke();
+    }
+    
+    public void BroadcastRestartGameEvent()
+    {
+        RestartGame?.Invoke();
     }
     
     #endregion Public Methods

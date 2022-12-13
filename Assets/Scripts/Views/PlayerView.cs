@@ -12,6 +12,10 @@ namespace Views
         private static readonly int IsPlayerJumping = Animator.StringToHash("IsPlayerJumping");
         private static readonly int Slide1 = Animator.StringToHash("Slide");
 
+        private const string OBSTACLE_GAME_OBJECT_NAME = "Obstacle";
+        private const string GAME_OVER_SOUND_NAME = "GameOver";
+        private const string MAIN_THEME_SOUND_NAME = "MainTheme";
+
         #endregion Const
     
     
@@ -212,6 +216,7 @@ namespace Views
         private void RegisterToCallbacks()
         {
             Client.Instance.GameStarted += OnGameStarted;
+            Client.Instance.RestartGame += OnRestartGame;
         }
 
         private void OnGameStarted()
@@ -220,16 +225,22 @@ namespace Views
             Client.Instance.GameStarted -= OnGameStarted;
         
         }
+        
+        private void OnRestartGame()
+        {
+            Client.Instance.RestartGame -= OnRestartGame;
+            Destroy(gameObject);
+        }
     
         private void OnControllerColliderHit(ControllerColliderHit hit)
         {
-            if (!hit.transform.CompareTag($"Obstacle")) return;
+            if (!hit.transform.CompareTag(OBSTACLE_GAME_OBJECT_NAME)) return;
         
             Client.Instance.BroadcastGameEndedEvent();
             _isGameStarted = false;
             animator.SetBool(IsGameStarted, false);
-            _soundEffectManager.PlaySound("GameOver", 0.60f);
-            _soundEffectManager.StopSound("MainTheme");
+            _soundEffectManager.PlaySound(GAME_OVER_SOUND_NAME, 0.60f);
+            _soundEffectManager.StopSound(MAIN_THEME_SOUND_NAME);
         }
     
         #endregion Event Handler

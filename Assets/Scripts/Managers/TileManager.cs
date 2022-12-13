@@ -110,11 +110,12 @@ namespace Managers
         private void RegisterToCallbacks()
         {
             Client.Instance.GameStarted += OnGameStarted;
+            Client.Instance.RestartGame += OnRestartGame;
         }
     
         private void OnGameStarted()
         {
-            UnRegisterFromCallbacks();
+            //UnRegisterFromCallbacks();
             _isGameStarted = true;
             _playerTransform = Client.Instance.PlayerController.PlayerTransform;
             _activeTiles = new List<GameObject>();
@@ -132,6 +133,22 @@ namespace Managers
                     SpawnTile(Random.Range(1, tilePrefabs.Length));
                 }
             }
+        }
+        
+        private void OnRestartGame()
+        {
+            foreach (GameObject activeTile in _activeTiles)
+            {
+                
+                Destroy(activeTile);
+            }
+            
+            _activeTiles = null;
+            _isGameStarted = false;
+            _playerTransform = null;
+            _tileLength = 0;
+            _tileNumber = 0;
+            _spawnPosition = 0;
         }
     
         private void UnRegisterFromCallbacks()
