@@ -51,6 +51,8 @@ public class Client : MonoBehaviour
     public PlayerController PlayerController => _playerController;
     public SoundEffectManager SoundEffectManager => _soundEffectManager;
 
+    public AssetsBundleService AssetsBundleService => _assetsBundleService;
+
     #endregion Properties
     
     
@@ -95,7 +97,7 @@ public class Client : MonoBehaviour
 
     public void DownloadAssetBundle(string prefabName)
     {
-        _assetsBundleService.StartNewCoroutine(prefabName);
+        _assetsBundleService.StartDownloading(prefabName);
     }
     
     public void BroadcastStartLoadGameViewEvent()
