@@ -124,14 +124,7 @@ namespace Managers
 
             for (int i = 0; i < tilePrefabs.Length; i++)
             {
-                if (i == 0)
-                {
-                    SpawnTile(0);
-                }
-                else
-                {
-                    SpawnTile(Random.Range(1, tilePrefabs.Length));
-                }
+                SpawnTile(i);
             }
         }
         

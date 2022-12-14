@@ -54,6 +54,7 @@
      <Compile Include="Assets\Scripts\Controllers\LoginController.cs" />
      <Compile Include="Assets\Scripts\Controllers\GameController.cs" />
      <Compile Include="Assets\Scripts\Views\GameView.cs" />
+     <Compile Include="Assets\Scripts\Views\LoadingScreenView.cs" />
      <Folder Include="Assets" />
      <Folder Include="Assets\Scenes\EndlessRunner" />
      <Folder Include="Assets\Scripts" />
