@@ -1,8 +1,10 @@
 using System;
+using System.Collections;
 using Controllers;
 using Managers;
 using Services;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 public class Client : MonoBehaviour
 {
@@ -24,9 +26,6 @@ public class Client : MonoBehaviour
     
     #region --- Events ---
 
-    public event Action ConfigurationStateDone;
-    public event Action StartLoadGameView;
-    public event Action CompleteLoadGameView;
     public event Action GameStarted;
     public event Action GameEnded;
     public event Action RestartGame;
@@ -36,10 +35,12 @@ public class Client : MonoBehaviour
     
     #region --- Members ---
 
+    private AssetsBundleService _assetsBundleService;
+
     private LoginController _loginController;
     private GameController _gameController;
     private PlayerController _playerController;
-    private AssetsBundleService _assetsBundleService;
+    
     private SoundEffectManager _soundEffectManager;
 
     #endregion Members
@@ -47,11 +48,11 @@ public class Client : MonoBehaviour
     
     #region --- Properties ---
 
+    public AssetsBundleService AssetsBundleService => _assetsBundleService;
+    public SoundEffectManager SoundEffectManager => _soundEffectManager;
+    public LoginController LoginController => _loginController;
     public GameController GameController => _gameController;
     public PlayerController PlayerController => _playerController;
-    public SoundEffectManager SoundEffectManager => _soundEffectManager;
-
-    public AssetsBundleService AssetsBundleService => _assetsBundleService;
 
     #endregion Properties
     
@@ -60,15 +61,8 @@ public class Client : MonoBehaviour
 
     private void Awake()
     {
-        if (_instance != null)
-        {
-            Destroy(_instance);
-        }
-
-        _instance = this;
-        
         Init();
-        BroadcastConfigurationStateDoneEvent();
+        _assetsBundleService.DownloadBundle();
     }
 
     #endregion Mono Methods
@@ -78,36 +72,38 @@ public class Client : MonoBehaviour
 
     private void Init()
     {
-        _assetsBundleService = GameObject.Find(ASSET_BUNDLE_SERVICE_OBJECT_NAME).GetComponent<AssetsBundleService>();
+        if (_instance != null)
+        {
+            Destroy(_instance);
+        }
+
+        _instance = this;
+        _assetsBundleService = new AssetsBundleService();
         _soundEffectManager = GameObject.Find(SOUND_EFFECT_MANAGER_OBJECT_NAME).GetComponent<SoundEffectManager>();
         _loginController = new LoginController();
         _gameController = new GameController();
         _playerController = new PlayerController();
+        TileController tileController = new TileController();
     }
     
-    private void BroadcastConfigurationStateDoneEvent()
-    {
-        ConfigurationStateDone?.Invoke();
-    }
-
     #endregion Private Methods
     
     
     #region --- Public Methods ---
 
-    public void DownloadAssetBundle(string prefabName)
+    public GameObject InstantiatedObject(GameObject go)
     {
-        _assetsBundleService.StartDownloading(prefabName);
+        return Instantiate(go);
     }
-    
-    public void BroadcastStartLoadGameViewEvent()
+
+    public void HandleCoroutine(IEnumerator methodName)
     {
-        StartLoadGameView?.Invoke();
+        StartCoroutine(methodName);
     }
-    
-    public void BroadcastCompleteLoadGameViewEvent()
+
+    public GameObject GetLoadedBundle(string prefabName)
     {
-        CompleteLoadGameView?.Invoke();
+        return _assetsBundleService.GetLoadedBundle(prefabName);
     }
     
     public void BroadcastGameStartedEvent()

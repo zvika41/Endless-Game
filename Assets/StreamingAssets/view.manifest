@@ -1,12 +1,12 @@
 ManifestFileVersion: 0
-CRC: 1404635625
+CRC: 302570219
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 239a14f89a8b5e3f075f9ebf82da5adc
+    Hash: 4bd7111c91d2b0c470bd49fa314db26f
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 5b0ce1d4d9109337e1e968dedc47b9fd
+    Hash: f8997dd723d67784f4cb95687a1d7448
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -34,6 +34,8 @@ ClassTypes:
 - Class: 95
   Script: {instanceID: 0}
 - Class: 114
+  Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+- Class: 114
   Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
 - Class: 114
   Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
@@ -44,9 +46,9 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 11500000, guid: 8056e4c5b0c0fbe49959f7211f44cce9, type: 3}
 - Class: 114
-  Script: {fileID: 11500000, guid: 309e2770cb953ae47bb6b0bc7c55ab6a, type: 3}
+  Script: {fileID: 11500000, guid: f14790210d1729844911a61e9464805a, type: 3}
 - Class: 114
-  Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  Script: {fileID: 11500000, guid: 309e2770cb953ae47bb6b0bc7c55ab6a, type: 3}
 - Class: 114
   Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
 - Class: 114
@@ -89,7 +91,14 @@ SerializeReferenceClassIdentifiers:
 - AssemblyName: UnityEngine.UI
   ClassName: UnityEngine.UI.SpriteState
 Assets:
+- Assets/AssetBundle/tiles/Tile2.prefab
+- Assets/AssetBundle/tiles/Tile4.prefab
+- Assets/AssetBundle/tiles/Tile6.prefab
+- Assets/AssetBundle/tiles/Tile1.prefab
 - Assets/AssetBundle/view/GameView.prefab
 - Assets/AssetBundle/view/LoginView.prefab
 - Assets/AssetBundle/view/PlayerView.prefab
+- Assets/AssetBundle/tiles/Tile3.prefab
+- Assets/AssetBundle/tiles/Tile5.prefab
+- Assets/AssetBundle/view/TileView.prefab
 Dependencies: []

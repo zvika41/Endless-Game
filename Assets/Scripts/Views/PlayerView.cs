@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Managers;
 using UnityEngine;
@@ -15,16 +16,13 @@ namespace Views
         private const string OBSTACLE_GAME_OBJECT_NAME = "Obstacle";
         private const string GAME_OVER_SOUND_NAME = "GameOver";
         private const string MAIN_THEME_SOUND_NAME = "MainTheme";
+        private const string COLLECT_COIN_SOUND_NAME = "CollectCoin";
 
         #endregion Const
     
     
         #region --- Serialize Fields ---
-
-        [SerializeField] private GameObject player;
-        [SerializeField] private float speed;
-        [SerializeField] private float laneDistance; //distance between 2 lanes
-        [SerializeField] private float jumpForce;
+        
         [SerializeField] private Animator animator;
 
         #endregion Serialize Fields
@@ -32,6 +30,8 @@ namespace Views
 
         #region --- Members ---
 
+        private Action _coinCollected;
+        private Action _gameOver;
         private CharacterController _characterController;
         private SoundEffectManager _soundEffectManager;
         private Transform _localTransform;
@@ -40,47 +40,27 @@ namespace Views
         private Vector3 _position;
         private Vector3 _diff;
         private Vector3 _movingDirection;
+        private float _speed;
+        private float _laneDistance; //distance between 2 lanes
+        private float _jumpForce;
         private int _currentLane;
         private float _gravity;
         private float _maxSpeed;
-        private bool _isGameStarted;
+        private bool _shouldStartGame;
         private bool _isPlayerSliding;
 
         #endregion Members
 
-    
-        #region --- Properties ---
 
-        public GameObject Player => player;
-
-        #endregion Properties
-    
-   
         #region --- Mono Methods ---
-
-        private void Start()
-        {
-            RegisterToCallbacks();
-
-            Client.Instance.PlayerController.PlayerTransform = transform;
-            _characterController = GetComponent<CharacterController>();
-            _soundEffectManager = Client.Instance.SoundEffectManager;
-            _localTransform = transform;
-            _currentLane = 1;
-            _gravity = -20;
-            _maxSpeed = 36;
-            _isGameStarted = true;
-            
-            Client.Instance.BroadcastGameStartedEvent();
-        }
 
         private void Update()
         {
-            if(!_isGameStarted) return;
-        
-            if (speed < _maxSpeed)
+            if(!_shouldStartGame) return;
+            
+            if (_speed < _maxSpeed)
             {
-                speed += 0.1f * Time.deltaTime;
+                _speed += 0.1f * Time.deltaTime;
             }
 
             if (!animator.GetBool(IsGameStarted))
@@ -89,24 +69,44 @@ namespace Views
             }
 
             HandlePlayerMovement();
-            
         }
 
-        private void FixedUpdate()
-        {
-            if(!_isGameStarted) return;
-        
-            
-        }
-    
         #endregion Mono Methods
 
-    
+
+        #region --- Public Methods ---
+
+        public void SetupView(float speedValue, float landDistanceValue, float jumpForceValue, int currentLane, float gravity, float maxSpeed, Action onCoinCollected,  Action onGameOver)
+        {
+            _speed = speedValue;
+            _laneDistance = landDistanceValue;
+            _jumpForce = jumpForceValue;
+            _coinCollected = onCoinCollected;
+            _gameOver = onGameOver;
+            _currentLane = currentLane;
+            _gravity = gravity;
+            _maxSpeed = maxSpeed;
+            _localTransform = transform;
+            Client.Instance.PlayerController.PlayerTransform = _localTransform;
+            _characterController = GetComponent<CharacterController>();
+            _soundEffectManager = Client.Instance.SoundEffectManager;
+            
+           _shouldStartGame = true;
+        }
+        
+        public void Destroy()
+        {
+            Destroy(gameObject);
+        }
+
+        #endregion Public Methods
+        
+        
         #region --- Private Methods ---
 
         private void HandlePlayerMovement()
         {
-            _playerDirection.z = speed;
+            _playerDirection.z = _speed;
 
             if (_characterController.isGrounded && SwipeManager.SwipeUp)
             {
@@ -163,7 +163,7 @@ namespace Views
 
         private void Jump()
         {
-            _playerDirection.y = jumpForce;
+            _playerDirection.y = _jumpForce;
         }
 
         private IEnumerator Slide()
@@ -186,11 +186,11 @@ namespace Views
 
             if (_currentLane == 0)
             {
-                _playerCurrentPos += Vector3.left * laneDistance;
+                _playerCurrentPos += Vector3.left * _laneDistance;
             }
             else if (_currentLane == 2)
             {
-                _playerCurrentPos += Vector3.right * laneDistance;
+                _playerCurrentPos += Vector3.right * _laneDistance;
             }
         
             if (_localTransform.position == _playerCurrentPos) return;
@@ -213,34 +213,33 @@ namespace Views
 
         #region --- Event Handler ---
 
-        private void RegisterToCallbacks()
-        {
-            Client.Instance.GameStarted += OnGameStarted;
-            Client.Instance.RestartGame += OnRestartGame;
-        }
-
-        private void OnGameStarted()
-        {
-            _isGameStarted = true;
-            Client.Instance.GameStarted -= OnGameStarted;
-        
-        }
-        
-        private void OnRestartGame()
-        {
-            Client.Instance.RestartGame -= OnRestartGame;
-            Destroy(gameObject);
-        }
-    
         private void OnControllerColliderHit(ControllerColliderHit hit)
         {
             if (!hit.transform.CompareTag(OBSTACLE_GAME_OBJECT_NAME)) return;
-        
-            Client.Instance.BroadcastGameEndedEvent();
-            _isGameStarted = false;
+            
+            _shouldStartGame = false;
             animator.SetBool(IsGameStarted, false);
             _soundEffectManager.PlaySound(GAME_OVER_SOUND_NAME, 0.60f);
             _soundEffectManager.StopSound(MAIN_THEME_SOUND_NAME);
+            
+            OnGameOver();
+        }
+        
+        private void OnTriggerEnter(Collider other)
+        {
+            OnCoinCollected();
+            Client.Instance.SoundEffectManager.PlaySound(COLLECT_COIN_SOUND_NAME, 0.30f);
+            Destroy(other.gameObject);
+        }
+        
+        private void OnCoinCollected()
+        {
+            _coinCollected?.Invoke();
+        }
+
+        private void OnGameOver()
+        {
+            _gameOver?.Invoke();
         }
     
         #endregion Event Handler

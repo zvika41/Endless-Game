@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.InputSystem.EnhancedTouch;
+using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 namespace Managers
 {
@@ -28,6 +30,12 @@ namespace Managers
 
         #region --- Mono Methods ---
 
+        private void OnEnable()
+        {
+            EnhancedTouchSupport.Enable();
+            Touch.onFingerDown += OnFingerPressDown;
+        }
+
         private void Update()
         {
             if (_swipeLeft || _swipeRight || _swipeUp || _swipeDown)
@@ -45,6 +53,11 @@ namespace Managers
     
     
         #region --- Private Methods ---
+
+        private void OnFingerPressDown(Finger finger)
+        {
+            Debug.LogError(finger.screenPosition);
+        }
 
         private void StandaloneInputs()
         {

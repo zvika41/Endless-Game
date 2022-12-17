@@ -1,3 +1,4 @@
+using System;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -7,14 +8,6 @@ namespace Views
 {
     public class GameView : MonoBehaviour, IPointerClickHandler
     {
-        #region --- Const ---
-
-        private const string MAIN_THEME_MUSIC_NAME = "MainTheme";
-        private const string COINS_TEXT = "Coins ";
-
-        #endregion Const
-        
-        
         #region --- Serialize Fields ---
 
         [SerializeField] private GameObject startGameText;
@@ -26,10 +19,21 @@ namespace Views
 
         #region --- Members ---
 
+        private Action _gameViewLoadCompleted;
+        private Action _gameStarted;
+        private Action _restartGame;
         private int _coinsAmountCollected;
+        private string _themeMusicName;
 
         #endregion Members
 
+
+        #region --- Properties ---
+
+        public Text CoinsAmountText => coinsAmountText;
+
+        #endregion Properties
+        
 
         #region --- Mono Methods ---
 
@@ -37,42 +41,48 @@ namespace Views
         {
             gameOverPanel.SetActive(false);
             coinsAmountText.gameObject.SetActive(false);
-            startGameText.SetActive(true);
+            startGameText.SetActive(false);
             Time.timeScale = 1;
-        
-            RegisterToCallbacks();
+            
+            OnGameViewLoadCompleted();
         }
 
         #endregion Mono Methods
 
 
+        #region --- Public Methods ---
+
+        public void SetupView(string themeMusicName, string coinText, Action onViewCompleted, Action onGameStart, Action onGameRestart)
+        {
+            _themeMusicName = themeMusicName;
+            coinsAmountText.text = coinText;
+            _gameStarted = onGameStart;
+            _gameViewLoadCompleted = onViewCompleted;
+            _restartGame = onGameRestart;
+        }
+        
+        public void HandleGameEnded()
+        {
+            gameOverPanel.SetActive(true);
+            Time.timeScale = 0;
+        }
+
+        #endregion Public Methods
+        
+        
         #region --- Event Handler ---
 
-        private void RegisterToCallbacks()
+        private void OnGameViewLoadCompleted()
         {
-            Client.Instance.GameEnded += OnGameEnded;
-            Client.Instance.PlayerController.CoinCollected += HandleCoinCollected;
-        }
-    
-        private void HandleCoinCollected()
-        {
-            _coinsAmountCollected++;
-            coinsAmountText.text = COINS_TEXT + _coinsAmountCollected;
-        }
-    
-        private void OnGameEnded()
-        {
-            Time.timeScale = 0;
-            gameOverPanel.SetActive(true);
-            UnRegisterFromCallbacks();
+            startGameText.SetActive(true);
+            _gameViewLoadCompleted?.Invoke();
         }
 
-        private void UnRegisterFromCallbacks()
+        private void OnGameStarted()
         {
-            Client.Instance.GameEnded -= OnGameEnded;
-            Client.Instance.PlayerController.CoinCollected -= HandleCoinCollected;
+            _gameStarted?.Invoke();
         }
-
+    
         #endregion Event Handler
 
 
@@ -80,17 +90,16 @@ namespace Views
         
         public void OnPointerClick(PointerEventData eventData)
         {
-            Client.Instance.BroadcastCompleteLoadGameViewEvent();
             coinsAmountText.gameObject.SetActive(true);
-            coinsAmountText.text = COINS_TEXT + _coinsAmountCollected;
             startGameText.SetActive(false);
-            Client.Instance.SoundEffectManager.PlaySound(MAIN_THEME_MUSIC_NAME);
+            Client.Instance.SoundEffectManager.PlaySound(_themeMusicName);
+            
+            OnGameStarted();
         }
 
         public void ReplayGame()
         {
-            UnRegisterFromCallbacks();
-            Client.Instance.BroadcastRestartGameEvent();
+            _restartGame?.Invoke();
             Destroy(gameObject);
         }
    
@@ -98,11 +107,8 @@ namespace Views
         {
             #if UNITY_EDITOR
             EditorApplication.ExitPlaymode();
-            
-            
             #else
             Application.Quit();
-
             #endif
         }
 

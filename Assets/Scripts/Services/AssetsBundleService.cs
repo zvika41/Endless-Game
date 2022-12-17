@@ -5,27 +5,23 @@ using UnityEngine.Networking;
 
 namespace Services
 {
-    public class AssetsBundleService : MonoBehaviour
+    public class AssetsBundleService
     {
-        #region --- Serialize Fields ---
+        #region --- Const ---
 
-        //private string bundleUrl = "https://localhost/assetbundles";
-        [SerializeField] private string bundleUrl;
+        private const string BundleUrl = "https://drive.google.com/uc?export=download&id=1yQsWvBZZ2TXiIduAEkxFHT3i4PWPL6C9";
 
-        #endregion Serialize Fields
+        #endregion Const
         
         
         #region --- Members ---
-
-        private AssetBundle _assetBundle;
-        private GameObject _prefab;
-        private string _assetName;
+        
+        private  AssetBundle _assetBundle;
 
         #endregion Members
         
        
         #region --- Events ---
-
         public event Action AssetBundleDownloadCompleted;
 
         #endregion Events
@@ -33,19 +29,24 @@ namespace Services
 
         #region --- Public Methods ---
 
-        public void StartDownloading(string assetName)
+        public void DownloadBundle()
         {
-            StartCoroutine(DownloadingAssetBundle(assetName));
+            Client.Instance.HandleCoroutine(DownloadingAssetBundle(BundleUrl));
+        }
+
+        public GameObject GetLoadedBundle(string assetName)
+        {
+            return Client.Instance.InstantiatedObject(_assetBundle.LoadAsset<GameObject>(assetName));
         }
 
         #endregion Public Methods
         
         
         #region --- Private Methods ---
-        
-        private IEnumerator DownloadingAssetBundle(string assetName)
+
+        private IEnumerator DownloadingAssetBundle(string bundleUrl)
         {
-            using UnityWebRequest uwr = UnityWebRequestAssetBundle.GetAssetBundle(bundleUrl);
+            using UnityWebRequest uwr = UnityWebRequestAssetBundle.GetAssetBundle(bundleUrl, 0);
             yield return uwr.SendWebRequest();
 
             if (uwr.result == UnityWebRequest.Result.ConnectionError || uwr.result == UnityWebRequest.Result.ProtocolError || uwr.result == UnityWebRequest.Result.DataProcessingError)
@@ -55,14 +56,11 @@ namespace Services
             else
             {
                 _assetBundle = DownloadHandlerAssetBundle.GetContent(uwr);
-                _prefab = (GameObject) _assetBundle.LoadAsset(assetName);
-                Instantiate(_prefab);
-                _assetBundle.Unload(false);
-                BroadcastAssetBundleLoadCompleted();
+                OnDownloadCompleted();
             }
         }
         
-        private void BroadcastAssetBundleLoadCompleted()
+        private void OnDownloadCompleted()
         {
             AssetBundleDownloadCompleted?.Invoke();
         }

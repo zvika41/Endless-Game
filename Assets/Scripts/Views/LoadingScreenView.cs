@@ -32,17 +32,31 @@ namespace Views
 
         private void RegisterToCallbacks()
         {
-            Client.Instance.AssetsBundleService.AssetBundleDownloadCompleted += OnAssetBundleDownloadCompleted;
+            Client.Instance.LoginController.LoginLoadCompleted += OnLoginLoadCompleted;
+            Client.Instance.LoginController.GameLoadStart += OnGameLoadStarted;
+            Client.Instance.GameController.GameViewLoadCompleted += OnGameViewLoadCompleted;
         }
         
-        private void OnAssetBundleDownloadCompleted()
+        private void OnLoginLoadCompleted()
+        {
+            loadingScreenText.gameObject.SetActive(false);
+        }
+        
+        private void OnGameLoadStarted()
+        {
+            loadingScreenText.gameObject.SetActive(true);
+        }
+        
+        private void OnGameViewLoadCompleted()
         {
             loadingScreenText.gameObject.SetActive(false);
         }
     
         private void UnRegisterFromCallbacks()
         {
-            Client.Instance.AssetsBundleService.AssetBundleDownloadCompleted -= OnAssetBundleDownloadCompleted;
+            Client.Instance.LoginController.LoginLoadCompleted -= OnLoginLoadCompleted;
+            Client.Instance.LoginController.GameLoadStart -= OnGameLoadStarted;
+            Client.Instance.GameController.GameViewLoadCompleted -= OnGameViewLoadCompleted;
         }
 
         #endregion Event Handler
