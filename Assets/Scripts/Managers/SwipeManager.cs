@@ -1,6 +1,5 @@
 using UnityEngine;
-using UnityEngine.InputSystem.EnhancedTouch;
-using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
+using TouchPhase = UnityEngine.TouchPhase;
 
 namespace Managers
 {
@@ -9,7 +8,7 @@ namespace Managers
         #region --- Members ---
 
         private static bool _swipeLeft, _swipeRight, _swipeUp, _swipeDown;
-    
+
         private bool _isDragging;
         private Vector2 _startTouch, _swipeDelta;
         private float _xDirection;
@@ -30,20 +29,19 @@ namespace Managers
 
         #region --- Mono Methods ---
 
-        private void OnEnable()
-        {
-            EnhancedTouchSupport.Enable();
-            Touch.onFingerDown += OnFingerPressDown;
-        }
-
         private void Update()
         {
+            if(!Client.Instance.IsGameStarted) return;
+            
             if (_swipeLeft || _swipeRight || _swipeUp || _swipeDown)
             {
                 _swipeLeft = _swipeRight = _swipeUp =  _swipeDown = false;
             }
 
+            #if UNITY_EDITOR
             StandaloneInputs();
+            #endif
+            
             MobileInput();
             HandleDistanceCalculate();
             HandleDistanceCrossed();
@@ -53,11 +51,6 @@ namespace Managers
     
     
         #region --- Private Methods ---
-
-        private void OnFingerPressDown(Finger finger)
-        {
-            Debug.LogError(finger.screenPosition);
-        }
 
         private void StandaloneInputs()
         {
@@ -76,7 +69,7 @@ namespace Managers
         private void MobileInput()
         {
             if (Input.touches.Length <= 0) return;
-        
+            
             if (Input.touches[0].phase == TouchPhase.Began)
             {
                 _isDragging = true;

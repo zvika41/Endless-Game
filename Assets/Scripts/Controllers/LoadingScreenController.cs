@@ -7,7 +7,7 @@ namespace Controllers
     {
         #region --- Const ---
 
-        private const string LOADING_SCREEN_VIEW_OBJECT_NAME = "LoadingScreenView";
+        private const string LOADING_SCREEN_VIEW_OBJECT_NAME = "LoadingScreen";
 
         #endregion Const
         

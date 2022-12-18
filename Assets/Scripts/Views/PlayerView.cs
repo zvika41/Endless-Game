@@ -68,7 +68,7 @@ namespace Views
                 animator.SetBool(IsGameStarted, true);
             }
 
-            HandlePlayerMovement();
+            MoveForward();
         }
 
         #endregion Mono Methods
@@ -109,6 +109,15 @@ namespace Views
         
         
         #region --- Private Methods ---
+
+        private void MoveForward()
+        {
+            if(_characterController == null) return;
+            
+            _characterController.Move(_playerDirection * Time.deltaTime);
+            HandlePlayerMovement();
+            HandlePlayerCurrentPosition();
+        }
 
         private void HandlePlayerMovement()
         {
@@ -157,36 +166,8 @@ namespace Views
                     _currentLane = 0;
                 }
             }
-
-            HandlePlayerCurrentPosition();
-            MoveForward();
         }
-
-        private void MoveForward()
-        {
-            if(_characterController == null) return;
-            
-            _characterController.Move(_playerDirection * Time.deltaTime);
-        }
-
-        private void Jump()
-        {
-            _playerDirection.y = _jumpForce;
-        }
-
-        private IEnumerator Slide()
-        {
-            _isPlayerSliding = true;
-            _characterController.center = new Vector3(0, -0.5f, 0);
-            _characterController.height = 1;
-            animator.SetTrigger(Slide1);
-            yield return new WaitForSeconds(1f);
         
-            _characterController.center = new Vector3(0, 0, 0);
-            _characterController.height = 2;
-            _isPlayerSliding = false;
-        }
-    
         private void HandlePlayerCurrentPosition()
         {
             _position = _localTransform.position;
@@ -216,6 +197,24 @@ namespace Views
             }
         }
 
+        private void Jump()
+        {
+            _playerDirection.y = _jumpForce;
+        }
+
+        private IEnumerator Slide()
+        {
+            _isPlayerSliding = true;
+            _characterController.center = new Vector3(0, -0.5f, 0);
+            _characterController.height = 1;
+            animator.SetTrigger(Slide1);
+            yield return new WaitForSeconds(1f);
+        
+            _characterController.center = new Vector3(0, 0, 0);
+            _characterController.height = 2;
+            _isPlayerSliding = false;
+        }
+    
         #endregion Private Methods
 
 
