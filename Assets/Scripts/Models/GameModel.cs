@@ -46,19 +46,13 @@ namespace Models
             _prefabName = "GameView";
             _mainThemeMusicName = "MainTheme";
             _coinsText =  "Coins: ";
-            
+
             SetCurrentCoinsAmount();
             HandleSetDataDone();
         }
         
-        public void HandleCoinAmount(bool shouldReset)
+        public void HandleCoinAmount()
         {
-            if (shouldReset)
-            {
-                _coinsAmountCollected = 0;
-                return;
-            }
-            
             _coinsAmountCollected++;
             SetCurrentCoinsAmount();
         }
@@ -78,7 +72,7 @@ namespace Models
             _setDataDone?.Invoke();
         }
         
-        private void ResetData()
+        public void ResetData()
         {
             _setDataDone = null;
             _prefabName = null;

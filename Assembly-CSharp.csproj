@@ -42,6 +42,7 @@
   </PropertyGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\Managers\SwipeManager.cs" />
+     <Compile Include="Assets\Scripts\Services\ObjectRotationService.cs" />
      <Compile Include="Assets\Scripts\Models\PlayerModel.cs" />
      <Compile Include="Assets\Scripts\Models\TileModel.cs" />
      <Compile Include="Assets\Scripts\Controllers\PlayerController.cs" />
@@ -54,13 +55,16 @@
      <Compile Include="Assets\Scripts\Views\TileView.cs" />
      <Compile Include="Assets\Scripts\Views\LoginView.cs" />
      <Compile Include="Assets\Scripts\Views\LoadingScreenView.cs" />
+     <Compile Include="Assets\Scripts\Models\LoadingScreenModel.cs" />
      <Compile Include="Assets\Scripts\Managers\SoundEffectManager.cs" />
      <Compile Include="Assets\Scripts\Controllers\TileController.cs" />
      <Compile Include="Assets\Scripts\Controllers\LoginController.cs" />
      <Compile Include="Assets\Scripts\Controllers\GameController.cs" />
+     <Compile Include="Assets\Scripts\Controllers\LoadingScreenController.cs" />
      <Compile Include="Assets\Scripts\Models\GameModel.cs" />
      <Compile Include="Assets\Scripts\Views\GameView.cs" />
-     <Compile Include="Assets\Scripts\Services\ObjectRotationService.cs" />
+     <Compile Include="Assets\Scripts\Controllers\CameraController.cs" />
+     <Compile Include="Assets\Scripts\Models\CameraModel.cs" />
      <Folder Include="Assets" />
      <Folder Include="Assets\Scenes\EndlessRunner" />
      <Folder Include="Assets\Scripts" />

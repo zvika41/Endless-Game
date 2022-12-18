@@ -31,6 +31,19 @@ namespace Views
         }
 
         #endregion Mono Methods
+        
+        
+        #region --- Public Methods ---
+
+        public void SetupView(string buttonText, Action onViewReady, Action onGameStart)
+        {
+            button.text = buttonText;
+            LoginLoadCompleted = onViewReady;
+            GameStart = onGameStart;
+            OnLoginLoadCompleted();
+        }
+
+        #endregion Public Methods
 
 
         #region --- Private Methods ---
@@ -43,20 +56,7 @@ namespace Views
             }
         }
 
-        #endregion
-        
-       
-        #region --- Public Methods ---
-
-        public void SetupView(string buttonText, Action onViewReady, Action onGameStart)
-        {
-            button.text = buttonText;
-            LoginLoadCompleted = onViewReady;
-            GameStart = onGameStart;
-            OnLoginLoadCompleted();
-        }
-
-        #endregion Public Methods
+        #endregion Private Methods
         
         
         #region --- UI Button Events ---

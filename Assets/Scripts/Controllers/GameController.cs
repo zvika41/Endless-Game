@@ -1,4 +1,3 @@
-using System;
 using Models;
 using Views;
 
@@ -6,17 +5,11 @@ namespace Controllers
 {
     public class GameController
     {
-        #region --- Events ---
-        public event Action GameViewLoadCompleted;
-
-        #endregion Events
-        
-        
         #region --- Members ---
 
-        private GameView _gameView;
         private GameModel _model;
-
+        private GameView _gameView;
+        
         #endregion Members
 
 
@@ -24,8 +17,7 @@ namespace Controllers
 
         public GameController()
         {
-            _model = new GameModel(OnDataSetDone);
-            RegisterToCallbacks();
+            Client.Instance.GameSettingsDone += OnGameSettingsDone;
         }
 
         ~GameController()
@@ -37,12 +29,12 @@ namespace Controllers
         #endregion Constructor/Destructor
 
 
-         #region --- Private Methods ---
+        #region --- Private Methods ---
 
         private void SetupView(GameModel model)
         {
-            _gameView = Client.Instance.GetLoadedBundle(_model.PrefabName).GetComponent<GameView>();
-            _gameView.SetupView(model.MainThemeMusicName, model.CoinsText, OnGameViewLoadCompleted, OnGameStarted, OnRestartGame);
+            _gameView = Client.Instance.GetLoadedBundle(model.PrefabName).GetComponent<GameView>();
+            _gameView.SetupView(model.MainThemeMusicName, model.CoinsText, OnGameStarted, OnRestartGame);
         }
 
         #endregion Private Methods
@@ -52,13 +44,19 @@ namespace Controllers
         
         private void RegisterToCallbacks()
         {
-            Client.Instance.LoginController.GameLoadStart += OnGameLoadStart;
+            Client.Instance.PlayerController.CoinCollected += OnCoinCollected;
+            Client.Instance.TileController.TileLoadCompleted += OnTileLoadCompleted;
             Client.Instance.GameEnded += OnGameEnded;
-            
+        }
+        
+        private void OnGameSettingsDone()
+        {
+            RegisterToCallbacks();
         }
 
-        private void OnGameLoadStart()
+        private void OnTileLoadCompleted()
         {
+            _model = new GameModel(OnDataSetDone);
             _model.InitData();
         }
         
@@ -66,21 +64,15 @@ namespace Controllers
         {
             SetupView(_model);
         }
-        
-        private void OnGameViewLoadCompleted()
-        {
-            GameViewLoadCompleted?.Invoke();
-        }
 
         private void OnGameStarted()
         {
-            Client.Instance.PlayerController.CoinCollected += OnCoinCollected;
             Client.Instance.BroadcastGameStartedEvent();
         }
 
         private void OnCoinCollected()
         {
-            _model.HandleCoinAmount(false);
+            _model.HandleCoinAmount();
             _gameView.CoinsAmountText.text = _model.CoinsText;
         }
         
@@ -91,14 +83,15 @@ namespace Controllers
 
         private void OnRestartGame()
         {
-            _model.HandleCoinAmount(true);
-            Client.Instance.BroadcastRestartGameEvent();
-            OnGameLoadStart();
+           _gameView.Destroy();
+           _model.ResetData();
+           Client.Instance.BroadcastRestartGameEvent();
+           Client.Instance.BroadcastGameLoadStart();
         }
         
         private void UnRegisterFromCallbacks()
         {
-            Client.Instance.LoginController.GameLoadStart -= OnGameLoadStart;
+            Client.Instance.GameLoadStart -= OnTileLoadCompleted;
             Client.Instance.PlayerController.CoinCollected -= OnCoinCollected;
             Client.Instance.GameEnded -= OnGameEnded;
         }

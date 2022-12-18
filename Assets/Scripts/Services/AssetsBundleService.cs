@@ -9,7 +9,7 @@ namespace Services
     {
         #region --- Const ---
 
-        private const string BundleUrl = "https://drive.google.com/uc?export=download&id=1yQsWvBZZ2TXiIduAEkxFHT3i4PWPL6C9";
+        private const string BundleUrl = "https://drive.google.com/uc?export=download&id=1aZ3oTAQMAtERJL_g7PMRHf8OXPP5OghM";
 
         #endregion Const
         
@@ -17,20 +17,18 @@ namespace Services
         #region --- Members ---
         
         private  AssetBundle _assetBundle;
+        private Action _downloadSucceed;
+        private Action<string> _downloadFailed;
 
         #endregion Members
         
        
-        #region --- Events ---
-        public event Action AssetBundleDownloadCompleted;
-
-        #endregion Events
-
-
         #region --- Public Methods ---
 
-        public void DownloadBundle()
+        public void DownloadBundle(Action onSuccess, Action<string> onFailed)
         {
+            _downloadSucceed = onSuccess;
+            _downloadFailed = onFailed;
             Client.Instance.HandleCoroutine(DownloadingAssetBundle(BundleUrl));
         }
 
@@ -51,20 +49,15 @@ namespace Services
 
             if (uwr.result == UnityWebRequest.Result.ConnectionError || uwr.result == UnityWebRequest.Result.ProtocolError || uwr.result == UnityWebRequest.Result.DataProcessingError)
             {
-                Debug.Log(uwr.error);
+                _downloadFailed?.Invoke(uwr.error);
             }
             else
             {
                 _assetBundle = DownloadHandlerAssetBundle.GetContent(uwr);
-                OnDownloadCompleted();
+                _downloadSucceed?.Invoke();
             }
         }
         
-        private void OnDownloadCompleted()
-        {
-            AssetBundleDownloadCompleted?.Invoke();
-        }
-
         #endregion Private Methods
     }
 }

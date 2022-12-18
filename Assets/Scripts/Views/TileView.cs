@@ -22,7 +22,7 @@ namespace Views
         
         //private Dictionary<string, Queue<GameObject>> _poolDictionary;
 
-        private Action _coinCollected;
+        private Action _onSetupViewCompleted;
         private Transform _playerTransform;
         private Transform _transform;
         private List<Object> _activeTiles;
@@ -58,15 +58,54 @@ namespace Views
 
         private void Update()
         {
-            if(!_isGameStarted || _playerTransform == null || (!(_playerTransform.position.z - 35 > _spawnPosition - _numberOfTiles * _tileLength))) return;
-
-            SpawnTile(Random.Range(1, tilePrefabs.Count));
+            if(!Client.Instance.IsGameStarted || _playerTransform == null || (!(_playerTransform.position.z - 35 > _spawnPosition - _numberOfTiles * _tileLength))) return;
+            
+            SpawnTile(Random.Range(0, tilePrefabs.Count));
             DeleteTile();
         }
 
         #endregion Mono Methods
 
 
+        #region --- Public Methods ---
+
+        public void SetupView(float tileLength, int numberOfTiles, Action onSetupViewCompleted)
+        {
+            _tileLength = tileLength;
+            _numberOfTiles = numberOfTiles;
+            _onSetupViewCompleted = onSetupViewCompleted;
+            _activeTiles = new List<Object>();
+            _playerTransform = Client.Instance.PlayerController.PlayerTransform;
+
+            OnSetupViewCompleted();
+        }
+
+        public void SpawnTiles()
+        {
+            for (int i = 0; i < tilePrefabs.Count; i++)
+            {
+                SpawnTile(i);
+            }
+        }
+        
+        public void Destroy()
+        {
+            foreach (Object tile in _activeTiles)
+            {
+                Destroy(tile.GameObject());
+            }
+            
+            tilePrefabs.Clear();
+            _activeTiles.Clear();
+            _activeTiles = null;
+            _playerTransform = null;
+
+            Destroy(gameObject);
+        }
+
+        #endregion Public Methods
+        
+        
         #region --- Private Methods ---
         
         private void SpawnTile(int tileIndex)
@@ -102,46 +141,26 @@ namespace Views
         {
             Destroy(_activeTiles[0].GameObject());
             _activeTiles.RemoveAt(0);
+
+            if (_activeTiles.Count == 0)
+            {
+                Debug.LogError("arrived here");
+            }
         }
 
         #endregion Private Methods
 
-
-        #region --- Public Methods ---
-
-        public void SetupView(float tileLength, int numberOfTiles)
-        {
-            _playerTransform = Client.Instance.PlayerController.PlayerTransform;
-            _activeTiles = new List<Object>();
-            _tileLength = tileLength;
-            _numberOfTiles = numberOfTiles;
-
-            for (int i = 0; i < tilePrefabs.Count; i++)
-            {
-                SpawnTile(i);
-            }
-            
-            _isGameStarted = true;
-        }
         
-        public void RestartGame()
-        {
-            foreach (Object tile in _activeTiles)
-            {
-                Destroy(tile.GameObject());
-            }
-            
-            tilePrefabs.Clear();
-            _activeTiles.Clear();
-            _activeTiles = null;
-            _isGameStarted = false;
-            _playerTransform = null;
+        #region --- Event Handler ---
 
-            Destroy(gameObject);
+        private void OnSetupViewCompleted()
+        {
+            _onSetupViewCompleted?.Invoke();
         }
 
-        #endregion Public Methods
-        
+        #endregion Event Handler
+
+       
         
         
         //

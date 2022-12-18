@@ -30,6 +30,7 @@ namespace Views
 
         #region --- Members ---
 
+        private Action _setupViewCompleted;
         private Action _coinCollected;
         private Action _gameOver;
         private CharacterController _characterController;
@@ -46,7 +47,6 @@ namespace Views
         private int _currentLane;
         private float _gravity;
         private float _maxSpeed;
-        private bool _shouldStartGame;
         private bool _isPlayerSliding;
 
         #endregion Members
@@ -56,7 +56,7 @@ namespace Views
 
         private void Update()
         {
-            if(!_shouldStartGame) return;
+            if(!Client.Instance.IsGameStarted) return;
             
             if (_speed < _maxSpeed)
             {
@@ -76,24 +76,30 @@ namespace Views
 
         #region --- Public Methods ---
 
-        public void SetupView(float speedValue, float landDistanceValue, float jumpForceValue, int currentLane, float gravity, float maxSpeed, Action onCoinCollected,  Action onGameOver)
+        public void SetupView(float speedValue, float landDistanceValue, float jumpForceValue, int currentLane, float gravity, float maxSpeed, Action setupViewCompleted, Action onCoinCollected,  Action onGameOver)
         {
             _speed = speedValue;
             _laneDistance = landDistanceValue;
             _jumpForce = jumpForceValue;
-            _coinCollected = onCoinCollected;
-            _gameOver = onGameOver;
             _currentLane = currentLane;
             _gravity = gravity;
             _maxSpeed = maxSpeed;
+            _coinCollected = onCoinCollected;
+            _setupViewCompleted = setupViewCompleted;
+            _gameOver = onGameOver;
             _localTransform = transform;
             Client.Instance.PlayerController.PlayerTransform = _localTransform;
             _characterController = GetComponent<CharacterController>();
             _soundEffectManager = Client.Instance.SoundEffectManager;
             
-           _shouldStartGame = true;
+            OnSetupViewCompleted();
         }
         
+        public void HandlePlayerState(bool shouldEnabled)
+        {
+            gameObject.SetActive(shouldEnabled);
+        }
+
         public void Destroy()
         {
             Destroy(gameObject);
@@ -158,6 +164,8 @@ namespace Views
 
         private void MoveForward()
         {
+            if(_characterController == null) return;
+            
             _characterController.Move(_playerDirection * Time.deltaTime);
         }
 
@@ -212,12 +220,16 @@ namespace Views
 
 
         #region --- Event Handler ---
+        
+        private void OnSetupViewCompleted()
+        {
+            _setupViewCompleted?.Invoke();
+        }
 
         private void OnControllerColliderHit(ControllerColliderHit hit)
         {
             if (!hit.transform.CompareTag(OBSTACLE_GAME_OBJECT_NAME)) return;
             
-            _shouldStartGame = false;
             animator.SetBool(IsGameStarted, false);
             _soundEffectManager.PlaySound(GAME_OVER_SOUND_NAME, 0.60f);
             _soundEffectManager.StopSound(MAIN_THEME_SOUND_NAME);
@@ -231,7 +243,7 @@ namespace Views
             Client.Instance.SoundEffectManager.PlaySound(COLLECT_COIN_SOUND_NAME, 0.30f);
             Destroy(other.gameObject);
         }
-        
+
         private void OnCoinCollected()
         {
             _coinCollected?.Invoke();

@@ -1,5 +1,7 @@
 using System;
 using Models;
+using Unity.VisualScripting;
+using UnityEngine;
 using Views;
 
 namespace Controllers
@@ -7,8 +9,8 @@ namespace Controllers
     public class LoginController
     {
         #region --- Events ---
+        
         public event Action LoginLoadCompleted;
-        public event Action GameLoadStart;
 
         #endregion Events
         
@@ -25,13 +27,11 @@ namespace Controllers
 
         public LoginController()
         {
-            _model = new LoginModel();
             RegisterToCallbacks();
         }
 
         ~LoginController()
         {
-            UnRegisterFromCallbacks();
             _model = null;
         }
 
@@ -50,15 +50,17 @@ namespace Controllers
         
         
         #region --- Event Handler ---
-
+        
         private void RegisterToCallbacks()
         {
-            Client.Instance.AssetsBundleService.AssetBundleDownloadCompleted += OnAssetBundleDownloadCompleted;
+            Client.Instance.GameSettingsDone += OnGameSettingsDone;
         }
 
-        private void OnAssetBundleDownloadCompleted()
+        private void OnGameSettingsDone()
         {
-           SetupView();
+            UnRegisterFromCallbacks();
+            _model = new LoginModel();
+            SetupView();
         }
 
         private void OnLoginLoadCompleted()
@@ -68,12 +70,12 @@ namespace Controllers
 
         private void OnGameLoadStart()
         {
-            GameLoadStart?.Invoke();
+            Client.Instance.BroadcastGameLoadStart();
         }
         
         private void UnRegisterFromCallbacks()
         {
-            Client.Instance.AssetsBundleService.AssetBundleDownloadCompleted -= OnAssetBundleDownloadCompleted;
+            Client.Instance.GameSettingsDone -= OnGameSettingsDone;
         }
     
         #endregion Event Handler

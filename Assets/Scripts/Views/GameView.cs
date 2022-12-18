@@ -19,7 +19,6 @@ namespace Views
 
         #region --- Members ---
 
-        private Action _gameViewLoadCompleted;
         private Action _gameStarted;
         private Action _restartGame;
         private int _coinsAmountCollected;
@@ -44,7 +43,7 @@ namespace Views
             startGameText.SetActive(false);
             Time.timeScale = 1;
             
-            OnGameViewLoadCompleted();
+            startGameText.SetActive(true);
         }
 
         #endregion Mono Methods
@@ -52,13 +51,14 @@ namespace Views
 
         #region --- Public Methods ---
 
-        public void SetupView(string themeMusicName, string coinText, Action onViewCompleted, Action onGameStart, Action onGameRestart)
+        public void SetupView(string themeMusicName, string coinText, Action onGameStart, Action onGameRestart)
         {
             _themeMusicName = themeMusicName;
             coinsAmountText.text = coinText;
             _gameStarted = onGameStart;
-            _gameViewLoadCompleted = onViewCompleted;
             _restartGame = onGameRestart;
+            
+            
         }
         
         public void HandleGameEnded()
@@ -67,16 +67,15 @@ namespace Views
             Time.timeScale = 0;
         }
 
+        public void Destroy()
+        {
+            Destroy(gameObject);
+        }
+
         #endregion Public Methods
         
         
         #region --- Event Handler ---
-
-        private void OnGameViewLoadCompleted()
-        {
-            startGameText.SetActive(true);
-            _gameViewLoadCompleted?.Invoke();
-        }
 
         private void OnGameStarted()
         {
@@ -100,11 +99,12 @@ namespace Views
         public void ReplayGame()
         {
             _restartGame?.Invoke();
-            Destroy(gameObject);
         }
    
         public void QuitGame()
         {
+            Destroy(gameObject);
+            
             #if UNITY_EDITOR
             EditorApplication.ExitPlaymode();
             #else

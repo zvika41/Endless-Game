@@ -4,7 +4,6 @@ using Controllers;
 using Managers;
 using Services;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 public class Client : MonoBehaviour
 {
@@ -18,7 +17,6 @@ public class Client : MonoBehaviour
 
     #region --- Const ---
 
-    private const string ASSET_BUNDLE_SERVICE_OBJECT_NAME = "AssetBundle";
     private const string SOUND_EFFECT_MANAGER_OBJECT_NAME = "SoundEffectManager";
 
     #endregion Const
@@ -26,6 +24,8 @@ public class Client : MonoBehaviour
     
     #region --- Events ---
 
+    public event Action GameSettingsDone;
+    public event Action GameLoadStart;
     public event Action GameStarted;
     public event Action GameEnded;
     public event Action RestartGame;
@@ -37,10 +37,13 @@ public class Client : MonoBehaviour
 
     private AssetsBundleService _assetsBundleService;
 
+    private LoadingScreenController _loadingScreenController;
+    private CameraController _cameraController;
     private LoginController _loginController;
+    private TileController _tileController;
     private GameController _gameController;
     private PlayerController _playerController;
-    
+
     private SoundEffectManager _soundEffectManager;
 
     #endregion Members
@@ -48,11 +51,12 @@ public class Client : MonoBehaviour
     
     #region --- Properties ---
 
-    public AssetsBundleService AssetsBundleService => _assetsBundleService;
     public SoundEffectManager SoundEffectManager => _soundEffectManager;
     public LoginController LoginController => _loginController;
-    public GameController GameController => _gameController;
+    public TileController TileController => _tileController;
     public PlayerController PlayerController => _playerController;
+    
+    public bool IsGameStarted { get; private set; }
 
     #endregion Properties
     
@@ -62,7 +66,6 @@ public class Client : MonoBehaviour
     private void Awake()
     {
         Init();
-        _assetsBundleService.DownloadBundle();
     }
 
     #endregion Mono Methods
@@ -78,18 +81,50 @@ public class Client : MonoBehaviour
         }
 
         _instance = this;
+        _loadingScreenController = new LoadingScreenController();
+        _loadingScreenController.ParseData();
         _assetsBundleService = new AssetsBundleService();
-        _soundEffectManager = GameObject.Find(SOUND_EFFECT_MANAGER_OBJECT_NAME).GetComponent<SoundEffectManager>();
-        _loginController = new LoginController();
-        _gameController = new GameController();
-        _playerController = new PlayerController();
-        TileController tileController = new TileController();
+        _assetsBundleService.DownloadBundle(OnAssetBundleDownloadCompleted, OnAssetBundleDownloadFailed);
     }
-    
+
     #endregion Private Methods
     
     
+    #region --- Event Handler ---
+
+    private void OnAssetBundleDownloadCompleted()
+    {
+        _soundEffectManager = FindObjectByName<SoundEffectManager>(SOUND_EFFECT_MANAGER_OBJECT_NAME);
+
+        _loginController = new LoginController();
+        _gameController = new GameController();
+        _playerController = new PlayerController();
+        _tileController = new TileController();
+        _cameraController = new CameraController();
+        
+        OnGameSettingsDone();
+    }
+    
+    private void OnAssetBundleDownloadFailed(string errorReason)
+    {
+        // Add error popup
+       Debug.LogError(errorReason);
+    }
+    
+    private void OnGameSettingsDone()
+    {
+        GameSettingsDone?.Invoke();
+    }
+
+    #endregion Event Handler
+    
+    
     #region --- Public Methods ---
+
+    public T FindObjectByName<T>(string objectName) where T : MonoBehaviour
+    {
+       return GameObject.Find(objectName).GetComponent<T>();
+    }
 
     public GameObject InstantiatedObject(GameObject go)
     {
@@ -105,14 +140,21 @@ public class Client : MonoBehaviour
     {
         return _assetsBundleService.GetLoadedBundle(prefabName);
     }
+
+    public void BroadcastGameLoadStart()
+    {
+        GameLoadStart?.Invoke();
+    }
     
     public void BroadcastGameStartedEvent()
     {
+        IsGameStarted = true;
         GameStarted?.Invoke();
     }
     
     public void BroadcastGameEndedEvent()
     {
+        IsGameStarted = false;
         GameEnded?.Invoke();
     }
     

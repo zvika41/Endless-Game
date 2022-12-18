@@ -1,3 +1,4 @@
+using System;
 using Models;
 using Views;
 
@@ -5,10 +6,16 @@ namespace Controllers
 {
     public class TileController
     {
+        #region --- Events ---
+        public event Action TileLoadCompleted;
+
+        #endregion Events
+        
+        
         #region --- Members ---
 
-        private TileView _tileView;
         private TileModel _model;
+        private TileView _tileView;
 
         #endregion Members
         
@@ -35,7 +42,7 @@ namespace Controllers
         private void SetupView(TileModel model)
         {
             _tileView = Client.Instance.GetLoadedBundle(model.PrefabName).GetComponent<TileView>();
-            _tileView.SetupView(_model.TileLength, _model.NumberOfTiles);
+            _tileView.SetupView(_model.TileLength, _model.NumberOfTiles, OnTileLoadCompleted);
         }
 
         #endregion Private Methods
@@ -45,13 +52,24 @@ namespace Controllers
         
         private void RegisterToCallbacks()
         {
+            Client.Instance.PlayerController.PlayerLoadCompleted += OnPlayerLoadCompleted;
             Client.Instance.GameStarted += OnGameStarted;
             Client.Instance.RestartGame += OnRestartGame;
         }
         
-        private void OnGameStarted()
+        private void OnPlayerLoadCompleted()
         {
             _model.InitData();
+        }
+
+        private void OnTileLoadCompleted()
+        {
+            TileLoadCompleted?.Invoke();
+        }
+        
+        private void OnGameStarted()
+        {
+            _tileView.SpawnTiles();
         }
         
         private void OnDataSetDone()
@@ -61,11 +79,12 @@ namespace Controllers
 
         private void OnRestartGame()
         {
-            _tileView.RestartGame();
+            _tileView.Destroy();
         }
 
         private void UnRegisterFromCallbacks()
         {
+            Client.Instance.PlayerController.PlayerLoadCompleted -= OnPlayerLoadCompleted;
             Client.Instance.GameStarted -= OnGameStarted;
             Client.Instance.RestartGame -= OnRestartGame;
         }

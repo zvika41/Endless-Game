@@ -1,0 +1,2 @@
+C:\Users\zvika\Desktop\Unity Learning\Personal Projects\Unity Endless Game\Endless-Game\obj\Debug\Assembly-CSharp.csproj.AssemblyReference.cache
+C:\Users\zvika\Desktop\Unity Learning\Personal Projects\Unity Endless Game\Endless-Game\obj\Debug\Assembly-CSharp.csproj.CoreCompileInputs.cache
