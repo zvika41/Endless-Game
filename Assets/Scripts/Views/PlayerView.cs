@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using Managers;
+using Singleton;
 using UnityEngine;
 
 namespace Views

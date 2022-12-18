@@ -1,4 +1,5 @@
 using System;
+using Singleton;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;

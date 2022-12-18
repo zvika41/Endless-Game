@@ -1,4 +1,5 @@
 using Models;
+using Singleton;
 using Views;
 
 namespace Controllers

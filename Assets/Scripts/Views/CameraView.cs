@@ -1,3 +1,4 @@
+using Singleton;
 using UnityEngine;
 
 namespace Views

@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Unity.VisualScripting;
+using Singleton;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -66,7 +66,7 @@ namespace Views
         {
             foreach (GameObject tile in _activeTiles)
             {
-                Destroy(tile.GameObject());
+                Destroy(tile);
             }
             
             tilePrefabs.Clear();

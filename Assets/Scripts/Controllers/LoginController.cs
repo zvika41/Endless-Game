@@ -1,5 +1,6 @@
 using System;
 using Models;
+using Singleton;
 using Unity.VisualScripting;
 using UnityEngine;
 using Views;
